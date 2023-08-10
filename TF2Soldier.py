@@ -40,7 +40,7 @@ def pp_json(json_thing, sort=True, indents=4):
         return json.dumps(json_thing, sort_keys=sort, indent=indents)
     return None
 
-filenames = os.listdir("/home/container/memes/")
+filenames = os.listdir("./memes/")
 
 @bot.event
 async def on_ready():
@@ -57,8 +57,8 @@ async def add(ctx, left: int, right: int):
 @bot.command()
 async def meme(ctx):
     selected_file = random.choice(filenames)
-    path = os.path.join("/home/container/memes/", selected_file)
-
+    path = os.path.join("./memes/", selected_file)
+    print("Sending: ", path)
     await ctx.send(file=discord.File(path))
 
 
@@ -66,6 +66,9 @@ async def meme(ctx):
 @bot.command()
 async def repeat(ctx, times: int, content='repeating...'):
     """Repeats a message multiple times."""
+    if times > 200:
+        await ctx.send("200'den fazla repeat gönderemezsin")
+        return
     for i in range(times):
         await ctx.send(content)
         
