@@ -6,16 +6,13 @@ import random
 import os
 import http.client
 import json
-import time
+from discord.ext import tasks
 
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
 description = '''TF2 Soldier. Discord.py kullanılarak yapılan basit bir bot. Bir sıkıntı olursa @darkreader2636 ile iletişime geçin'''
-
-class ShitpostKomut:
-    """Shitpost Komutları"""
 
 bot = commands.Bot(command_prefix='.tf2 ', description=description, intents=intents)
 
@@ -26,6 +23,7 @@ response = {
 
 memes = os.listdir("./memes/")
 shitposts = os.listdir("./shitpost/")
+stopper = 0
 
 def namazvakit():
     conn = http.client.HTTPSConnection("api.collectapi.com")
@@ -50,9 +48,16 @@ def pp_json(json_thing, sort=True, indents=4):
 
 @bot.event
 async def on_ready():
+    global stopper
+    stopper = 0
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('--------------------------------------------')
+    stopper_task.start()
 
+@tasks.loop(seconds=1)  # task runs every 60 seconds
+async def stopper_task():
+    global stopper
+    stopper = False
 
 @bot.command()
 async def add(ctx, left: int, right: int):
@@ -74,7 +79,7 @@ async def hızlı(ctx, rp: str ):
 async def meme(ctx):
     """Rastgele bir resim gönderir."""
     selected_file = random.choice(memes)
-    path = os.path.join(memes, selected_file)
+    path = os.path.join("./memes", selected_file)
     print("Sending: ", path)
     await ctx.send(file=discord.File(path))
 
@@ -85,20 +90,29 @@ async def alper(ctx, istek: str):
     print("Sending: ", mp3file)
     await ctx.send(file=discord.File(mp3file))
 
-
 @bot.command()
 async def repeat(ctx, times: int, *, content='repeating...'):
     """Bir mesajı tekrarlar. (repeat <miktar> <mesaj>)"""
+    global stopper
     if times > 200:
         await ctx.send("200'den fazla repeat gönderemezsin")
         return
     for i in range(times):
-        await ctx.send(content)
+        if not stopper:
+            await ctx.send(content)
+        break
     
 @bot.command()
 async def namaz(ctx):
     """Namaz vakitlerini gösterir."""
     await ctx.send(pp_json(namazvakit()))
+
+@bot.command()
+async def dur(ctx):
+    """Repeat komutunu durdurur."""
+    global stopper
+    stopper = True
+
 
 @bot.command()
 async def buneamk(ctx):
@@ -114,7 +128,7 @@ async def alperinbacusu(ctx):
 async def shitpost(ctx):
     """Rastgele bir shitpost gönderir."""
     selected_sp = random.choice(shitposts)
-    patsp = os.path.join("./shitpost/", selected_sp)
+    patsp = os.path.join("./shitpost", selected_sp)
     print("Sending: Shitpost ", patsp)
     await ctx.send(file=discord.File(patsp))
 
