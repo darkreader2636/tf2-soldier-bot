@@ -54,7 +54,7 @@ async def on_ready():
     print('--------------------------------------------')
     stopper_task.start()
 
-@tasks.loop(seconds=1)  # task runs every 60 seconds
+@tasks.loop(seconds=5)  # task runs every 5 seconds
 async def stopper_task():
     global stopper
     stopper = False
@@ -93,14 +93,16 @@ async def alper(ctx, istek: str):
 @bot.command()
 async def repeat(ctx, times: int, *, content='repeating...'):
     """Bir mesajı tekrarlar. (repeat <miktar> <mesaj>)"""
-    global stopper
     if times > 200:
         await ctx.send("200'den fazla repeat gönderemezsin")
         return
     for i in range(times):
-        if not stopper:
-            await ctx.send(content)
-        break
+        global stopper
+        if stopper:
+            print("STOP")
+            break
+        await ctx.send(content)
+    return
     
 @bot.command()
 async def namaz(ctx):
@@ -112,6 +114,8 @@ async def dur(ctx):
     """Repeat komutunu durdurur."""
     global stopper
     stopper = True
+    stopper_task.stop()
+    stopper_task.start()
 
 
 @bot.command()
