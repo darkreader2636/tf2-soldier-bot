@@ -7,6 +7,7 @@ import os
 import http.client
 import json
 from discord.ext import tasks
+import asyncio
 
 intents = discord.Intents.default()
 intents.members = True
@@ -52,7 +53,7 @@ async def on_ready():
     stopper = 0
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('--------------------------------------------')
-    stopper_task.start()
+    #stopper_task.start()
 
 @tasks.loop(seconds=5)  # task runs every 5 seconds
 async def stopper_task():
@@ -85,19 +86,24 @@ async def meme(ctx):
 
 @bot.command()
 async def alper(ctx, istek: str):
-    """Alperin söylediği efsane şarkıları yollar. (pepe, kısa, uzun)"""
-    mp3file = "./alper_{}.mp3".format(istek)
-    print("Sending: ", mp3file)
-    await ctx.send(file=discord.File(mp3file))
+    if ( ctx.guild.id == 1122457879660724265):
+        """Alperin söylediği efsane şarkıları yollar. (pepe, kısa, uzun)""",
+        mp3file = "./alper_{}.mp3".format(istek)
+        print("Sending: ", mp3file)
+        await ctx.send(file=discord.File(mp3file))
+    else:
+        await ctx.send("Bilinmeyen Komut")
 
 @bot.command()
 async def repeat(ctx, times: int, *, content='repeating...'):
     """Bir mesajı tekrarlar. (repeat <miktar> <mesaj>)"""
+    global stopper
+    if stopper:
+        stopper = False
     if times > 200:
         await ctx.send("200'den fazla repeat gönderemezsin")
         return
     for i in range(times):
-        global stopper
         if stopper:
             print("STOP")
             break
@@ -114,8 +120,6 @@ async def dur(ctx):
     """Repeat komutunu durdurur."""
     global stopper
     stopper = True
-    stopper_task.stop()
-    stopper_task.start()
 
 
 @bot.command()
@@ -135,5 +139,10 @@ async def shitpost(ctx):
     patsp = os.path.join("./shitpost", selected_sp)
     print("Sending: Shitpost ", patsp)
     await ctx.send(file=discord.File(patsp))
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound): # or discord.ext.commands.errors.CommandNotFound as you wrote
+        await ctx.send("Bilinmeyen komut ")
 
 bot.run('MTEzODE5NTA4NjI3NDk5ODMxMg.GsEk4L.VgyHh5T33tR7YVK9ePpFMClETANYeZheGmiHbI')
