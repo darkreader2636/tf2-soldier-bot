@@ -8,6 +8,8 @@ import http.client
 import json
 from discord.ext import tasks
 import asyncio
+from dotenv import load_dotenv
+import datetime
 
 intents = discord.Intents.default()
 intents.members = True
@@ -16,6 +18,8 @@ intents.message_content = True
 description = '''TF2 Soldier. Discord.py kullanılarak yapılan basit bir bot. Bir sıkıntı olursa @darkreader2636 ile iletişime geçin'''
 
 bot = commands.Bot(command_prefix='.tf2 ', description=description, intents=intents)
+
+load_dotenv()
 
 #static vars
 response = {
@@ -53,12 +57,18 @@ async def on_ready():
     stopper = 0
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('--------------------------------------------')
-    #stopper_task.start()
+    kalan_gun.start()
 
-@tasks.loop(seconds=5)  # task runs every 5 seconds
-async def stopper_task():
-    global stopper
-    stopper = False
+@tasks.loop(minutes=1)
+async def kalan_gun():
+    if (datetime.datetime.now().hour == 15 and datetime.datetime.now().minute == 30):
+        today = datetime.date.today()
+        future = datetime.date(2024, 1, 22)
+        diff = future - today
+        channel = bot.get_channel(1150499657437417492)
+        print("sent")
+        await channel.send('Yarıyıl Tatiline {0} gün kaldı.'.format(str(diff)[:3]))
+
 
 @bot.command()
 async def add(ctx, left: int, right: int):
@@ -145,4 +155,4 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound): # or discord.ext.commands.errors.CommandNotFound as you wrote
         await ctx.send("Bilinmeyen komut ")
 
-bot.run('MTEzODE5NTA4NjI3NDk5ODMxMg.GsEk4L.VgyHh5T33tR7YVK9ePpFMClETANYeZheGmiHbI')
+bot.run(os.getenv('TOKEN'))
