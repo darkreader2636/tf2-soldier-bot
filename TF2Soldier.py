@@ -57,11 +57,12 @@ async def on_ready():
     stopper = 0
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('--------------------------------------------')
+    print(datetime.datetime.now())
     kalan_gun.start()
 
 @tasks.loop(minutes=1)
 async def kalan_gun():
-    if (datetime.datetime.now().hour == 15 and datetime.datetime.now().minute == 30):
+    if (datetime.datetime.now().hour == 14 and datetime.datetime.now().minute == 30):
         today = datetime.date.today()
         future = datetime.date(2024, 1, 22)
         diff = future - today
