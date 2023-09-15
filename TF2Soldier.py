@@ -21,6 +21,10 @@ bot = commands.Bot(command_prefix='.tf2 ', description=description, intents=inte
 
 load_dotenv()
 
+with open('karaliste.txt', 'r') as f:
+    words = f.read()
+    badwords = words.splitlines()
+
 #static vars
 response = {
   "gmod": "<@1008352427885465691> <@998201530639470642> <@831138134669918238> gmod girek."
@@ -50,6 +54,19 @@ def pp_json(json_thing, sort=True, indents=4):
     else:
         return json.dumps(json_thing, sort_keys=sort, indent=indents)
     return None
+
+@bot.listen('on_message')
+async def karaliste(message):
+    if message.author.bot: #if message's author is a bot, then ignore it.
+        return
+    msg = message.content
+    user = message.author
+    for word in badwords:
+        if word in msg:
+            await user.send("Küfür etme! (Mesaj: {0} Sunucu: {1})".format(msg, message.guild))
+            await asyncio.sleep(0.5)
+            await message.delete()
+            break
 
 @bot.event
 async def on_ready():
