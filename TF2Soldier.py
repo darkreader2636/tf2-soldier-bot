@@ -30,6 +30,12 @@ response = {
   "gmod": "<@1008352427885465691> <@998201530639470642> <@831138134669918238> gmod girek."
 }
 
+img_response = {
+  "buneamk": "./bunemm.jpg",
+  "kahkaha": "./kahkaha.gif",
+  "alperinbacusu": "./onay.jpg"
+}
+
 memes = os.listdir("./memes/")
 shitposts = os.listdir("./shitpost/")
 stopper = 0
@@ -54,19 +60,6 @@ def pp_json(json_thing, sort=True, indents=4):
     else:
         return json.dumps(json_thing, sort_keys=sort, indent=indents)
     return None
-
-@bot.listen('on_message')
-async def karaliste(message):
-    if message.author.bot: #if message's author is a bot, then ignore it.
-        return
-    msg = message.content
-    user = message.author
-    for word in badwords:
-        if word in msg:
-            await user.send("Küfür etme! (Mesaj: {0} Sunucu: {1})".format(msg, message.guild))
-            await asyncio.sleep(0.5)
-            await message.delete()
-            break
 
 @bot.event
 async def on_ready():
@@ -149,16 +142,13 @@ async def dur(ctx):
     global stopper
     stopper = True
 
-
 @bot.command()
-async def buneamk(ctx):
-    print("Sending: Bune")
-    await ctx.send(file=discord.File("./bunemm.jpg"))
-    
-@bot.command()
-async def alperinbacusu(ctx):
-    print("Sending: onay.jpg")
-    await ctx.send(file=discord.File("./onay.jpg"))
+async def resim(ctx, *, resim):
+    """İsmi verilen resmi gönderir"""
+    print("Sending: {}".format(resim))
+    if ctx.message.reference is not None:
+        ctx = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+    await ctx.reply(file=discord.File(img_response[resim]), mention_author=False)
     
 @bot.command()
 async def shitpost(ctx):
@@ -171,6 +161,6 @@ async def shitpost(ctx):
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound): # or discord.ext.commands.errors.CommandNotFound as you wrote
-        await ctx.send("Bilinmeyen komut ")
+        await ctx.send("Bilinmeyen komut: {0}".format(ctx.message.content))
 
 bot.run(os.getenv('TOKEN'))
