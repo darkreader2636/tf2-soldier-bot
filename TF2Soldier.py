@@ -7,9 +7,9 @@ import os
 import http.client
 import json
 from discord.ext import tasks
-import asyncio
 from dotenv import load_dotenv
 import datetime
+
 
 intents = discord.Intents.default()
 intents.members = True
@@ -69,6 +69,7 @@ async def on_ready():
     print('--------------------------------------------')
     print(datetime.datetime.now())
     kalan_gun.start()
+    await bot.tree.sync()
 
 @tasks.loop(minutes=1)
 async def kalan_gun():
@@ -81,7 +82,7 @@ async def kalan_gun():
         await channel.send('Yarıyıl Tatiline {0} gün kaldı.'.format(str(diff)[:3]))
 
 
-@bot.command()
+@bot.hybrid_command()
 async def add(ctx, left: int, right: int):
     """İki sayıyı toplar. (add <sayı> <sayı>)"""
     await ctx.send(left + right)
@@ -147,8 +148,14 @@ async def resim(ctx, *, resim):
     """İsmi verilen resmi gönderir"""
     print("Sending: {}".format(resim))
     if ctx.message.reference is not None:
-        ctx = await ctx.channel.fetch_message(ctx.message.reference.message_id)
-    await ctx.reply(file=discord.File(img_response[resim]), mention_author=False)
+        message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+        await message.reply("<@{0}> tarafından gönderildi.".format(ctx.author.id),file=discord.File(img_response[resim]), mention_author=False)
+        await ctx.message.delete()
+    else:
+        message = ctx
+        await message.send("<@{0}> tarafından gönderildi.".format(ctx.author.id),file=discord.File(img_response[resim]), mention_author=False)
+    await ctx.message.delete()
+    
     
 @bot.command()
 async def shitpost(ctx):
