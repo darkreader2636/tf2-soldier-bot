@@ -38,6 +38,7 @@ img_response = {
 
 memes = os.listdir("./memes/")
 shitposts = os.listdir("./shitpost/")
+hl_shitposts = os.listdir("./hl1/")
 stopper = 0
 
 def namazvakit():
@@ -164,6 +165,14 @@ async def shitpost(ctx):
     patsp = os.path.join("./shitpost", selected_sp)
     print("Sending: Shitpost ", patsp)
     await ctx.send(file=discord.File(patsp))
+
+@bot.command()
+async def hl_shitpost(ctx):
+    """Rastgele bir Half-Life shitpostu gönderir."""
+    selected_hl = random.choice(hl_shitposts)
+    pathl = os.path.join("./hl1", selected_hl)
+    print("Sending: HL Shitpost ", pathl)
+    await ctx.send(file=discord.File(pathl))
 
 @bot.event
 async def on_command_error(ctx, error):
