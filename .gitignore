@@ -7,3 +7,4 @@ bunemm.jpg
 onay.jpg
 *.mp4
 images/
+__pycache__/

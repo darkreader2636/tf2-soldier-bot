@@ -12,6 +12,8 @@ import datetime
 from deep_translator import GoogleTranslator
 import pickle
 import asyncio
+from time import perf_counter 
+from logger import my_logger
 
 
 intents = discord.Intents.default()
@@ -26,6 +28,7 @@ load_dotenv()
 
 #static vars
 
+log = my_logger()
 global response
 with open('response.pkl', 'rb') as f:
     response = pickle.load(f)
@@ -54,7 +57,9 @@ def contains_word(s, w):
     return (' ' + w + ' ') in (' ' + s + ' ')
 
 def namazgonder():
+    timer_start = perf_counter()
     r = requests.get("https://namazvakitleri.diyanet.gov.tr/tr-TR/9609/kastamonu-icin-namaz-vakti")
+    log.INFO(f"Got 1 page in {perf_counter() - timer_start} seconds.")
     source = BeautifulSoup(r.content,"lxml")
     tarih = source.find("div",attrs={"class":"ti-hicri"})
     tarih = tarih.text
@@ -74,13 +79,39 @@ def namazgonder():
     vakit = imsak+gunes+oglen+ikindi+aksam+yatsi
     return vakit
 
+def fiyatlar():
+    t1_start = perf_counter()
+
+    main_page = BeautifulSoup(requests.get("https://www.bloomberght.com/").content,"lxml")
+
+    usd     = main_page.find('small', class_='value LastPrice', attrs={'data-secid':'USDTRY Curncy'}).get_text()
+    eur     = main_page.find('small', class_='value LastPrice', attrs={'data-secid':'EURTRY Curncy'}).get_text()
+    gbp     = main_page.find('tr', class_='tab-content-bottom-list live-ingiliz-sterlini').find_next('td', class_='LastPrice').text
+    ceyrek  = main_page.find('tr', class_='tab-content-bottom-list live-gram-altin').find_next('td', class_='LastPrice').text
+    bist    = main_page.find('small', class_='value LastPrice', attrs={'data-secid':'XU100 Index'}).get_text()
+    faiz    = main_page.find('small', class_='value LastPrice', attrs={'data-secid':'TAHVIL2Y'}).get_text()
+
+    log.INFO(f"Got 1 page in {perf_counter() - t1_start} seconds.")
+
+    #final= "USD/TRY: {0}\nEUR/TRY: {1}\nGBP/TRY: {2}\nÇeyrek Satış: {3}\nBIST 100: {4}\nFaiz: {5}".format(usd,eur,gbp,ceyrek,bist,faiz)
+    embed = discord.Embed(title="Döviz Kurları", color=0xff0000, description="Son Güncelleme: <t:{0}>".format(int(datetime.datetime.now().timestamp())))
+    embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/d/d7/Philippine-stock-market-board.jpg")
+    embed.add_field(name="Dolar/TL:", value = usd, inline=True)
+    embed.add_field(name="Euro/TL:", value = eur, inline=True)
+    embed.add_field(name="Sterlin/TL:", value = gbp, inline=True)
+    embed.add_field(name="Çeyrek Alış:", value = ceyrek, inline=True)
+    embed.add_field(name="BIST 100:", value = bist, inline=True)
+    embed.add_field(name="Faiz:", value = faiz, inline=True)
+    return embed
+
 @bot.event
 async def on_ready():
     global stopper
     stopper = 0
-    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
-    print('--------------------------------------------')
-    print(datetime.datetime.now())
+#    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
+#    print('--------------------------------------------')
+#    print(datetime.datetime.now())
+    log.Startup(bot.user, bot.user.id)
     kalan_gun.start()
     await bot.tree.sync()
 
@@ -102,6 +133,8 @@ async def kufur_kontrol(message, user):
     global badwords
     msg = message.content.lower()
     user = message.author
+    if user.id == 1151874908842893452:
+        return
     for word in badwords:
         if word in msg:
             if contains_word(msg, word):
@@ -132,7 +165,7 @@ async def kalan_gun():
         future = datetime.date(2024, 1, 22)
         diff = future - today
         channel = bot.get_channel(1150499657437417492)
-        print("sent")
+        log.INFO("Sent daily message")
         await channel.send('Yarıyıl Tatiline {0} gün kaldı.'.format(str(diff)[:3]))
 
 
@@ -143,23 +176,25 @@ async def add(ctx, left: int, right: int):
 
 @bot.hybrid_command()
 async def çevir(ctx, istek: str, hedef: str):
+    """Verilen metinleri çevirir."""
     translated = GoogleTranslator(source='auto', target=hedef).translate(text=istek)  
     await ctx.send(translated)
 
 
 @bot.hybrid_command(pass_context=True)
 async def ping(ctx):
-    """ Pong! """
     await ctx.send('Pong! {0}'.format(round(bot.latency, 1)))
 
 @bot.hybrid_command()
 async def karaliste_ekle(ctx, kelime: str):
+    """Karalisteye kelime ekler."""
     global badwords
     with open('karaliste.txt', 'a') as f:
         f.write("{0}\n".format(kelime))
     with open('karaliste.txt', 'r') as f:
         words = f.read()
         badwords = words.splitlines()
+    log.INFO("Added {0} to blacklist.".format(kelime))
     await ctx.send("Eklendi!")
  
 @bot.hybrid_command()
@@ -169,6 +204,7 @@ async def hızlı(ctx, rp: str ):
 
 @bot.hybrid_command()
 async def hızlı_ekle(ctx, name: str , tmp: str):
+    """Hızlı yanıt moduna kelimeler ekler."""
     global response
     if name not in response.keys():
         response[name] = tmp
@@ -182,15 +218,16 @@ async def meme(ctx):
     """Rastgele bir resim gönderir."""
     selected_file = random.choice(memes)
     path = os.path.join("./memes", selected_file)
-    print("Sending: ", path)
+    log.INFO("Sending: "+ path)
     await ctx.send(file=discord.File(path))
+
 
 @bot.hybrid_command()
 async def alper(ctx, istek: str):
     if ( ctx.guild.id == 1122457879660724265):
         """Alperin söylediği efsane şarkıları yollar. (pepe, kısa, uzun)""",
         mp3file = "./alper_{}.mp3".format(istek)
-        print("Sending: ", mp3file)
+        log.INFO("Sending: " + mp3file)
         await ctx.send(file=discord.File(mp3file))
     else:
         await ctx.send("Bilinmeyen Komut")
@@ -217,6 +254,11 @@ async def namaz(ctx):
     await ctx.send(namazgonder())
 
 @bot.hybrid_command()
+async def borsa(ctx):
+    """Borsa durumunu gönderir."""
+    await ctx.send(embed=fiyatlar())
+
+@bot.hybrid_command()
 async def dur(ctx):
     """Repeat komutunu durdurur."""
     global stopper
@@ -225,7 +267,7 @@ async def dur(ctx):
 @bot.hybrid_command()
 async def resim(ctx, *, resim):
     """İsmi verilen resmi gönderir"""
-    print("Sending: {}".format(resim))
+    log.INFO("Sending: {}".format(resim))
     if ctx.message.reference is not None:
         message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
         await message.reply("<@{0}> tarafından gönderildi.".format(ctx.author.id),file=discord.File(img_response[resim]), mention_author=False)
@@ -241,7 +283,7 @@ async def shitpost(ctx):
     """Rastgele bir shitpost gönderir."""
     selected_sp = random.choice(shitposts)
     patsp = os.path.join("./shitpost", selected_sp)
-    print("Sending: Shitpost ", patsp)
+    log.INFO("Sending: Shitpost " + patsp)
     await ctx.send(file=discord.File(patsp))
 
 @bot.hybrid_command()
@@ -249,12 +291,13 @@ async def hl_shitpost(ctx):
     """Rastgele bir Half-Life shitpostu gönderir."""
     selected_hl = random.choice(hl_shitposts)
     pathl = os.path.join("./hl1", selected_hl)
-    print("Sending: HL Shitpost ", pathl)
+    log.INFO("Sending: "+ pathl)
     await ctx.send(file=discord.File(pathl))
 
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound): # or discord.ext.commands.errors.CommandNotFound as you wrote
         await ctx.send("Bilinmeyen komut: {0}".format(ctx.message.content))
+        log.ERROR("Unknown Command: {0}".format(ctx.message.content))
 
 bot.run(os.getenv('TOKEN'))
