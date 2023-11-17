@@ -8,3 +8,4 @@ onay.jpg
 *.mp4
 images/
 __pycache__/
+*log

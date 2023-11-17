@@ -45,7 +45,14 @@ img_response = {
   "alperinbacusu": "./images/onay.jpg",
   "salih": "./images/salih.mp4",
   "ney": "./images/ney.jpg",
-  "al oc": "./images/parmak.mp4"
+  "al oc": "./images/parmak.mp4",
+  "gabe": "./images/gabe.png",
+  "bi durun": "./images/bidurun.jpg",
+  "kek": "./images/kek.jpg",
+  "trombon": "./images/trombon.mp4",
+  "ets2": "./images/ets2.png",
+  "hl3": "./images/hl3.png",
+  "metro": "./images/metro.png"
 }
 
 memes = os.listdir("./memes/")
@@ -94,7 +101,7 @@ def fiyatlar():
     log.INFO(f"Got 1 page in {perf_counter() - t1_start} seconds.")
 
     #final= "USD/TRY: {0}\nEUR/TRY: {1}\nGBP/TRY: {2}\nÇeyrek Satış: {3}\nBIST 100: {4}\nFaiz: {5}".format(usd,eur,gbp,ceyrek,bist,faiz)
-    embed = discord.Embed(title="Döviz Kurları", color=0xff0000, description="Son Güncelleme: <t:{0}>".format(int(datetime.datetime.now().timestamp())))
+    embed = discord.Embed(title="Döviz Kurları", color=0xff0000, description="Son Güncelleme: <t:{0}:t>".format(int(datetime.datetime.now().timestamp())))
     embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/d/d7/Philippine-stock-market-board.jpg")
     embed.add_field(name="Dolar/TL:", value = usd, inline=True)
     embed.add_field(name="Euro/TL:", value = eur, inline=True)
@@ -102,6 +109,35 @@ def fiyatlar():
     embed.add_field(name="Çeyrek Alış:", value = ceyrek, inline=True)
     embed.add_field(name="BIST 100:", value = bist, inline=True)
     embed.add_field(name="Faiz:", value = faiz, inline=True)
+    return embed
+
+def benzin_fiyat():
+    t1_start = perf_counter()
+    r = requests.get("https://www.petrolofisi.com.tr/akaryakit-fiyatlari",headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'})
+    log.INFO(f"Got 1 page in {perf_counter() - t1_start} seconds.")
+
+    sec = BeautifulSoup(r.content,"lxml").findAll('li')
+
+    for item in sec:
+        if "KASTAMONU" in item.text:
+            result = item
+            break
+        else: 
+            pass
+
+    new_soup = BeautifulSoup(result.prettify(),"lxml")
+    for i in new_soup.findAll('div', class_='mt-2'): #Remove child element of <div>'s
+        i.find_next().decompose()
+
+    out = new_soup.findAll('div', class_='mt-2')
+
+    list = []
+    for tip in out:
+        list.append(tip.get_text().strip())
+    embed=discord.Embed(title="Akaryakıt Fiyatları", url="https://www.petrolofisi.com.tr/akaryakit-fiyatlari", description="Son Güncelleme: <t:{0}:t>".format(int(datetime.datetime.now().timestamp())), color=0xff0000)
+    embed.add_field(name="Benzin", value=list[0], inline=True)
+    embed.add_field(name="Mazot", value=list[1], inline=True)
+    embed.add_field(name="Otogaz", value=list[3], inline=True)
     return embed
 
 @bot.event
@@ -126,6 +162,8 @@ async def on_message(message: discord.Message):
         await message.channel.send("as")
     if contains_word(message.content.lower(), "ney") and not  message.author.bot:
         await message.channel.send(file=discord.File(img_response["ney"]))
+    if contains_word(message.content.lower(), ":gabe:") and not  message.author.bot:
+        await message.channel.send(file=discord.File(img_response["gabe"]))
     await kufur_kontrol(message, message.author)
     await bot.process_commands(message)
 
@@ -259,6 +297,11 @@ async def borsa(ctx):
     await ctx.send(embed=fiyatlar())
 
 @bot.hybrid_command()
+async def akaryakıt(ctx):
+    """Akaryakıt fiyatlarını gönderir."""
+    await ctx.send(embed=benzin_fiyat())
+
+@bot.hybrid_command()
 async def dur(ctx):
     """Repeat komutunu durdurur."""
     global stopper
@@ -300,4 +343,4 @@ async def on_command_error(ctx, error):
         await ctx.send("Bilinmeyen komut: {0}".format(ctx.message.content))
         log.ERROR("Unknown Command: {0}".format(ctx.message.content))
 
-bot.run(os.getenv('TOKEN'))
+bot.run(os.getenv('TOKEN'), log_handler=None)
