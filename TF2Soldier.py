@@ -23,12 +23,10 @@ intents.message_content = True
 description = '''TF2 Soldier. Discord.py kullanılarak yapılan basit bir bot. Bir sıkıntı olursa @darkreader2636 ile iletişime geçin'''
 
 bot = commands.Bot(command_prefix='.tf2 ', description=description, intents=intents)
+log = my_logger()
 
 load_dotenv()
 
-#static vars
-
-log = my_logger()
 global response
 with open('response.pkl', 'rb') as f:
     response = pickle.load(f)
@@ -134,7 +132,10 @@ def benzin_fiyat():
     list = []
     for tip in out:
         list.append(tip.get_text().strip())
-    embed=discord.Embed(title="Akaryakıt Fiyatları", url="https://www.petrolofisi.com.tr/akaryakit-fiyatlari", description="Son Güncelleme: <t:{0}:t>".format(int(datetime.datetime.now().timestamp())), color=0xff0000)
+    embed=discord.Embed(title="Akaryakıt Fiyatları", 
+    url="https://www.petrolofisi.com.tr/akaryakit-fiyatlari", 
+    description="Son Güncelleme: <t:{0}:t>".format(int(datetime.datetime.now().timestamp())), color=0xff0000)
+    
     embed.add_field(name="Benzin", value=list[0], inline=True)
     embed.add_field(name="Mazot", value=list[1], inline=True)
     embed.add_field(name="Otogaz", value=list[3], inline=True)
@@ -153,17 +154,21 @@ async def on_ready():
 
 @bot.event
 async def on_message(message: discord.Message):
-    channel = bot.get_channel(1156596803291058227)
     if message.author == bot.user:
         return
     if message.guild is None and not message.author.bot:
-        await channel.send(message.content)
+        channel = bot.get_channel(int(os.getenv('DM_CHANNEL')))
+        await channel.send(f"User: {message.author.display_name} \n{message.content}")
+    
     if contains_word(message.content.lower(), "sa") and not  message.author.bot:
         await message.channel.send("as")
+    
     if contains_word(message.content.lower(), "ney") and not  message.author.bot:
         await message.channel.send(file=discord.File(img_response["ney"]))
+    
     if contains_word(message.content.lower(), ":gabe:") and not  message.author.bot:
         await message.channel.send(file=discord.File(img_response["gabe"]))
+    
     await kufur_kontrol(message, message.author)
     await bot.process_commands(message)
 
@@ -176,7 +181,8 @@ async def kufur_kontrol(message, user):
     for word in badwords:
         if word in msg:
             if contains_word(msg, word):
-                channel = bot.get_channel(1169648813414305833)
+                channel = bot.get_channel(int(os.getenv('LOG_CHANNEL')))
+                channel_2 = bot.get_channel(int(os.getenv('LOG_CHANNEL_2')))
                 embed=discord.Embed(title="Küfür Kaydı", color=0xff0000)
                 embed.add_field(name="Kullanıcı", value = message.author, inline=True)
                 embed.add_field(name="Kanal", value = message.channel, inline=True)
@@ -184,6 +190,7 @@ async def kufur_kontrol(message, user):
                 embed.add_field(name="Yasaklı Kelime", value = word, inline=True)
                 embed.add_field(name="Tarih", value=str(datetime.datetime.now()), inline=True)
                 await channel.send(embed=embed)
+                await channel_2.send(embed=embed)
                 dm_embed = discord.Embed(title="Küfür Kaydı", color=0xff0000)
                 dm_embed.add_field(name="Sunucu", value = message.guild, inline=True)
                 dm_embed.add_field(name="Kanal", value = message.channel, inline=True)
@@ -202,7 +209,7 @@ async def kalan_gun():
         today = datetime.date.today()
         future = datetime.date(2024, 1, 22)
         diff = future - today
-        channel = bot.get_channel(1150499657437417492)
+        channel = bot.get_channel(int(os.getenv('DAILY_CHANNEL')))
         log.INFO("Sent daily message")
         await channel.send('Yarıyıl Tatiline {0} gün kaldı.'.format(str(diff)[:3]))
 
@@ -276,7 +283,7 @@ async def repeat(ctx, times: int, *, content):
     global stopper
     if stopper:
         stopper = False
-    if times > 200:
+    if times > 300:
         await ctx.send("200'den fazla repeat gönderemezsin")
         return
     for i in range(times):

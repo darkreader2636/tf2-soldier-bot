@@ -7,6 +7,7 @@ images/
 #python Folders
 __pycache__/
 env/
+.venv/
 
 #Files
 *.mp3
@@ -15,3 +16,4 @@ env/
 *.mp4
 *.log
 *.code-workspace
+bot.log
