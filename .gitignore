@@ -1,11 +1,17 @@
+#Bot-Specific folders
 memes/
 shitpost/
 hl1/
+images/
+
+#python Folders
+__pycache__/
+env/
+
+#Files
 *.mp3
 .env
-bunemm.jpg
-onay.jpg
+*.jpg
 *.mp4
-images/
-__pycache__/
-*log
+*.log
+*.code-workspace
