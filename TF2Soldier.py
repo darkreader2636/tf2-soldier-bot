@@ -63,7 +63,7 @@ def contains_word(s, w):
 
 def namazgonder():
     timer_start = perf_counter()
-    r = requests.get("https://namazvakitleri.diyanet.gov.tr/tr-TR/9609/kastamonu-icin-namaz-vakti")
+    r = requests.get("https://namazvakitleri.diyanet.gov.tr/tr-TR/9609/kastamonu-icin-namaz-vakti",headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'})
     log.INFO(f"Got 1 page in {perf_counter() - timer_start} seconds.")
     source = BeautifulSoup(r.content,"lxml")
     tarih = source.find("div",attrs={"class":"ti-hicri"})
