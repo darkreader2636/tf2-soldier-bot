@@ -205,9 +205,9 @@ async def kufur_kontrol(message, user):
 
 @tasks.loop(minutes=1)
 async def kalan_gun():
-    if (datetime.datetime.now().hour == 14 and datetime.datetime.now().minute == 30):
+    if (datetime.datetime.now().hour == 17 and datetime.datetime.now().minute == 30):
         today = datetime.date.today()
-        future = datetime.date(2024, 1, 22)
+        future = datetime.date(2024, 1, 19)
         diff = future - today
         channel = bot.get_channel(int(os.getenv('DAILY_CHANNEL')))
         log.INFO("Sent daily message")
