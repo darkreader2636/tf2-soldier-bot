@@ -65,7 +65,7 @@ def namazgonder():
     timer_start = perf_counter()
     r = requests.get("https://namazvakitleri.diyanet.gov.tr/tr-TR/9609/kastamonu-icin-namaz-vakti",headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'})
     log.INFO(f"Got 1 page in {perf_counter() - timer_start} seconds.")
-    source = BeautifulSoup(r.content,"lxml")
+    source = BeautifulSoup(r.content,"html.parser")
     tarih = source.find("div",attrs={"class":"ti-hicri"})
     tarih = tarih.text
     tarih = tarih.replace("\n","")
@@ -87,7 +87,7 @@ def namazgonder():
 def fiyatlar():
     t1_start = perf_counter()
 
-    main_page = BeautifulSoup(requests.get("https://www.bloomberght.com/").content,"lxml")
+    main_page = BeautifulSoup(requests.get("https://www.bloomberght.com/").content,"html.parser")
 
     usd     = main_page.find('small', class_='value LastPrice', attrs={'data-secid':'USDTRY Curncy'}).get_text()
     eur     = main_page.find('small', class_='value LastPrice', attrs={'data-secid':'EURTRY Curncy'}).get_text()
@@ -114,7 +114,7 @@ def benzin_fiyat():
     r = requests.get("https://www.petrolofisi.com.tr/akaryakit-fiyatlari",headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'})
     log.INFO(f"Got 1 page in {perf_counter() - t1_start} seconds.")
 
-    sec = BeautifulSoup(r.content,"lxml").findAll('li')
+    sec = BeautifulSoup(r.content,"html.parser").findAll('li')
 
     for item in sec:
         if "KASTAMONU" in item.text:
@@ -123,7 +123,7 @@ def benzin_fiyat():
         else: 
             pass
 
-    new_soup = BeautifulSoup(result.prettify(),"lxml")
+    new_soup = BeautifulSoup(result.prettify(),"html.parser")
     for i in new_soup.findAll('div', class_='mt-2'): #Remove child element of <div>'s
         i.find_next().decompose()
 
@@ -169,7 +169,7 @@ async def on_message(message: discord.Message):
     if contains_word(message.content.lower(), ":gabe:") and not  message.author.bot:
         await message.channel.send(file=discord.File(img_response["gabe"]))
     
-    await kufur_kontrol(message, message.author)
+    #await kufur_kontrol(message, message.author)
     await bot.process_commands(message)
 
 async def kufur_kontrol(message, user):
@@ -211,7 +211,7 @@ async def kalan_gun():
         diff = future - today
         channel = bot.get_channel(int(os.getenv('DAILY_CHANNEL')))
         log.INFO("Sent daily message")
-        await channel.send('Yarıyıl Tatiline {0} gün kaldı.'.format(str(diff)[:3]))
+        await channel.send('{0} gün kaldı.'.format(str(diff)[:2]))
 
 
 @bot.hybrid_command()

@@ -17,3 +17,4 @@ env/
 *.log
 *.code-workspace
 bot.log
+.vscode/launch.json
