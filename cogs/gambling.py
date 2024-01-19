@@ -1,5 +1,5 @@
 from discord.ext import commands
-from economy import Economy
+from cogs.economy import Economy
 import discord
 import random
 
@@ -14,16 +14,19 @@ class Gambling(commands.Cog):
     @commands.command(pass_context=True)
     @commands.cooldown(1, 60*60*24, commands.BucketType.user)
     async def daily(self, ctx):
+        """Her gün günlük paranızı alın!"""
         self.eco.add_money(ctx.author.id, 500)
         await ctx.send("Günlüğün olan 500₺ 'yi aldın.")
 
     @commands.command(pass_context=True)
     async def cash(self, ctx):
+        """Elinizdeki para miktarını gösterir"""
         usr_money = self.eco.get_entry(ctx.author.id)[1]
         await ctx.send(f"Şu anda {usr_money}₺ paran var.")
 
     @commands.command(pass_context=True)
     async def cf(self, ctx, amount):
+        """Biraz para kazanmak için yazı tura atın."""
         balance = self.eco.get_entry(ctx.author.id)[1]
         if amount == "all":
             if balance < 2500:
@@ -36,7 +39,7 @@ class Gambling(commands.Cog):
         if amount > balance:
             await ctx.send("Yeterli paran yok!")
             return
-        sonuc = random.randrange(0,11)
+        sonuc = random.SystemRandom.randrange(1, 11)
 
         if sonuc < 5:
             self.eco.remove_money(ctx.author.id, amount)
