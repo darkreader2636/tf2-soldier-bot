@@ -18,3 +18,4 @@ env/
 *.code-workspace
 bot.log
 .vscode/launch.json
+economy.db
