@@ -90,12 +90,14 @@ class Economy:
         return self.get_entry(user_id)
 
     @_commit
-    def remove_money(self, user_id: int, money_to_add: int) -> Entry:
+    def remove_money(self, user_id: int, money_to_remove: int) -> Entry:
         money = self.get_entry(user_id)[1]
-        if money_to_add > money:
+        if money_to_remove > money:
             total = 0
         else:
-            total = money - money_to_add
+            total = money - money_to_remove
+        if total < 0:
+            total = 0 #Final fail-safe 
         self.set_money(user_id, total)
         return self.get_entry(user_id)
 

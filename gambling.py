@@ -38,7 +38,7 @@ class Gambling(commands.Cog):
             return
         sonuc = random.randrange(0,11)
 
-        if sonuc < 8:
+        if sonuc < 5:
             self.eco.remove_money(ctx.author.id, amount)
             usr_money = self.eco.get_entry(ctx.author.id)[1]
             await ctx.send(f"{amount}₺ kaybettin! Paran:{usr_money}₺")

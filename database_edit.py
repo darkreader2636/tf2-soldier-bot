@@ -27,4 +27,7 @@ while True:
         eco.set_money(id, amt)
     elif act == 5:
         eco.remove_entry(id)
+    else:
+        print("Invalid Option")
+        pass
     print("\n" + str(eco.get_entry(id)[1]))
