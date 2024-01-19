@@ -12,7 +12,8 @@ import datetime
 from deep_translator import GoogleTranslator
 import pickle
 import asyncio
-from time import perf_counter 
+from time import perf_counter
+from gambling import Gambling
 from logger import my_logger
 
 
@@ -150,6 +151,7 @@ async def on_ready():
 #    print(datetime.datetime.now())
     log.Startup(bot.user, bot.user.id)
     kalan_gun.start()
+    await bot.add_cog(Gambling(bot))
     await bot.tree.sync()
 
 @bot.event
