@@ -35,6 +35,9 @@ with open('karaliste.txt', 'r') as f:
 	words = f.read()
 	badwords = words.splitlines()
 
+dev_mode = 0
+channel_send = ["0", "1"]
+
 img_response = {
   "buneamk": "./images/bunemm.jpg",
   "buneamk 2": "./images/buneamk2.jpg",
@@ -77,6 +80,26 @@ async def on_ready():
 
 @bot.event
 async def on_message(message: discord.Message):
+
+	global dev_mode
+	global channel_send
+
+	if message.content == ".tf2 dev off":
+		dev_mode = 0
+		channel_send = ["0", "1"]
+		return
+
+	if message.content == ".tf2 dev on":
+		dev_mode = 1
+		channel_send = ["0", "1"]
+		return
+	
+	if dev_mode == 1 and message.content[:4] == ".tf2":
+		if message.channel.id not in channel_send:
+			await message.channel.send("Bot şu an bakımda.")
+			channel_send.append(message.channel.id)
+		return
+
 	if message.author == bot.user:
 		return
 	if message.guild is None and not message.author.bot:

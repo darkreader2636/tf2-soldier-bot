@@ -69,14 +69,18 @@ class Gambling(commands.Cog):
         if miktar > balance:
             await ctx.send("Yeterli paran yok!")
             return
-        emojis = ['apple', 'cherries', 'doughnut', 'grapes', 'taco', 'watermelon']
+        emojis = ['flag_cm', 'flag_et', 'flag_mm', 'flag_sn', 'flag_vn', 'flag_gh']
 
         await ctx.send(f"{ctx.author.name} {miktar}₺'sine bahse girdi.")
 
-        slots = ['\t' for _ in range(3)]
+        await ctx.send("**`___SLOTS___`**")
+
+        slots = [':spider_web:' for _ in range(3)]
         slot_spin = self.slot_spin(slots)
 
         slot_message = await ctx.send(slot_spin)
+
+        await ctx.send("`|         |`")
 
         for slot_num in range(3):
             for _ in range(4):
@@ -104,6 +108,6 @@ class Gambling(commands.Cog):
         await ctx.send(out_text)
 
     def slot_spin(self, slots):
-        return f'|\t{slots[0]}\t|\t{slots[1]}\t|\t{slots[2]}\t|'
+        return f'` `{slots[0]}{slots[1]}{slots[2]}` ` .'
 
         
