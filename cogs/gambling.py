@@ -28,6 +28,9 @@ class Gambling(commands.Cog):
     @commands.command(pass_context=True, aliases=['cf', 'coin'])
     async def coinflip(self, ctx, amount):
         """Biraz para kazanmak için yazı tura atın."""
+        if miktar < 0:
+			await ctx.send("Miktar sıfırdan küçük olamaz!")
+			return
         balance = self.eco.get_entry(ctx.author.id)[1]
         if amount == "all":
             if balance < 2500:
@@ -65,7 +68,17 @@ class Gambling(commands.Cog):
     @commands.command(pass_context=True, aliases=['s', 'slot'])
     async def slots(self, ctx, miktar: int):
         """Paranla bahse girerek x10'e kadar kazan."""
+        if miktar < 0:
+			await ctx.send("Miktar sıfırdan küçük olamaz!")
+			return
         balance = self.eco.get_entry(ctx.author.id)[1]
+        if miktar == "all":                                                                                                              
+            if balance < 2500:                                                                                                            
+                miktar = balance                                                                                                          
+            else:                                                                                                                      
+                miktar = 2500                                                                                                             
+        else:                                                                                                                             
+            miktar = int(miktar)
         if miktar > balance:
             await ctx.send("Yeterli paran yok!")
             return
