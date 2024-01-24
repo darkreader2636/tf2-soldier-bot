@@ -66,6 +66,7 @@ class Gambling(commands.Cog):
         await ctx.send(f"<@{ctx.author.id}> <@{hedef.id}>'ye {amount}₺ gönderdi.")
 
     @commands.command(pass_context=True, aliases=['s', 'slot'])
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def slots(self, ctx, miktar: int):
         """Paranla bahse girerek x10'e kadar kazan."""
         if miktar < 0:
