@@ -28,7 +28,7 @@ class Gambling(commands.Cog):
     @commands.command(pass_context=True, aliases=['cf', 'coin'])
     async def coinflip(self, ctx, amount):
         """Biraz para kazanmak için yazı tura atın."""
-        if miktar < 0:
+        if amount < 0:
             await ctx.send("Miktar sıfırdan küçük olamaz!")
             return
         balance = self.eco.get_entry(ctx.author.id)[1]
@@ -67,25 +67,25 @@ class Gambling(commands.Cog):
 
     @commands.command(pass_context=True, aliases=['s', 'slot'])
     @commands.cooldown(1, 30, commands.BucketType.user)
-    async def slots(self, ctx, miktar: int):
+    async def slots(self, ctx, amount: int):
         """Paranla bahse girerek x10'e kadar kazan."""
-        if miktar < 0:
+        if amount < 0:
             await ctx.send("Miktar sıfırdan küçük olamaz!")
             return
         balance = self.eco.get_entry(ctx.author.id)[1]
-        if miktar == "all":                                                                                                              
+        if amount == "all":                                                                                                              
             if balance < 2500:                                                                                                            
-                miktar = balance                                                                                                          
+                amount = balance                                                                                                          
             else:                                                                                                                      
-                miktar = 2500                                                                                                             
+                amount = 2500                                                                                                             
         else:                                                                                                                             
-            miktar = int(miktar)
-        if miktar > balance:
+            amount = int(amount)
+        if amount > balance:
             await ctx.send("Yeterli paran yok!")
             return
         emojis = ['flag_cm', 'flag_et', 'flag_mm', 'flag_sn', 'flag_vn', 'flag_gh']
 
-        await ctx.send(f"{ctx.author.name} {miktar}₺'sine bahse girdi.")
+        await ctx.send(f"{ctx.author.name} {amount}₺'sine bahse girdi.")
 
         await ctx.send("**`___SLOTS___`**")
 
@@ -106,18 +106,18 @@ class Gambling(commands.Cog):
                 await sleep(0.35)
 
         if slots[0] == slots[1] == slots[2]:
-            miktar = miktar*10
-            self.eco.add_money(ctx.author.id, miktar)
-            out_text = f"{miktar}₺ kazandın! Paran: {self.eco.get_entry(ctx.author.id)[1]}₺"
+            amount = amount*10
+            self.eco.add_money(ctx.author.id, amount)
+            out_text = f"{amount}₺ kazandın! Paran: {self.eco.get_entry(ctx.author.id)[1]}₺"
 
         elif ( slots[0] == slots[1] or slots[0] == slots[2] or slots[1] == slots[2] ):
-            miktar = miktar*2
-            self.eco.add_money(ctx.author.id, miktar)
-            out_text = f"{miktar}₺ kazandın! Paran: {self.eco.get_entry(ctx.author.id)[1]}₺"
+            amount = amount*2
+            self.eco.add_money(ctx.author.id, amount)
+            out_text = f"{amount}₺ kazandın! Paran: {self.eco.get_entry(ctx.author.id)[1]}₺"
 
         else:
-            self.eco.remove_money(ctx.author.id, miktar)
-            out_text = f"{miktar}₺ kaybettin! Paran: {self.eco.get_entry(ctx.author.id)[1]}₺"
+            self.eco.remove_money(ctx.author.id, amount)
+            out_text = f"{amount}₺ kaybettin! Paran: {self.eco.get_entry(ctx.author.id)[1]}₺"
 
         await ctx.send(out_text)
 
