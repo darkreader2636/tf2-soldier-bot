@@ -18,7 +18,9 @@ class Economy:
         self.cur.execute("""CREATE TABLE IF NOT EXISTS economy (
             user_id INTEGER NOT NULL PRIMARY KEY,
             money INTEGER NOT NULL DEFAULT 0,
-            credits INTEGER NOT NULL DEFAULT 0
+            pretty_name TEXT NOT NULL DEFAULT doe,
+            streak INTEGER NOT NULL DEFAULT 0,
+            last_c INTEGER NOT NULL DEFAULT 0
         )""")
 
     def close(self):
@@ -50,8 +52,8 @@ class Economy:
     def new_entry(self, user_id: int) -> Entry:
         try:
             self.cur.execute(
-                "INSERT INTO economy(user_id, money, credits) VALUES(?,?,?)",
-                (user_id, 0, 0)
+                "INSERT INTO economy(user_id, money, pretty_name, streak ,last_c) VALUES(?,?,?,?,?)",
+                (user_id, 0, "none", 0, 0)
             )
             return self.get_entry(user_id)
         except sqlite3.IntegrityError:
