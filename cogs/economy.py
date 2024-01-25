@@ -54,7 +54,7 @@ class Economy:
         try:
             self.cur.execute(
                 "INSERT INTO economy(user_id, money, pretty_name, streak ,last_c) VALUES(?,?,?,?,?)",
-                (user_id, 0, "none", 0, datetime.datetime.now().timestamp())
+                (user_id, 0, "none", 0, 0)
             )
             return self.get_entry(user_id)
         except sqlite3.IntegrityError:
@@ -88,6 +88,14 @@ class Economy:
         self.cur.execute(
             "UPDATE economy SET streak=? WHERE user_id=?",
             (streak, user_id)
+        )
+        return self.get_entry(user_id)
+
+    @_commit
+    def set_claim(self, user_id: int, claim: int) -> Entry:
+        self.cur.execute(
+            "UPDATE economy SET last_c=? WHERE user_id=?",
+            (claim, user_id)
         )
         return self.get_entry(user_id)
 
@@ -129,10 +137,9 @@ class Economy:
         self.cur.execute("SELECT * FROM economy ORDER BY money DESC")
         return (self.cur.fetchmany(n) if n else self.cur.fetchall())
 
-"""
 eco = Economy()
 uuid = random.randrange(1, 100)
 eco.add_money(uuid, 100)
 eco.set_name(uuid, "John")
+eco.set_claim(uuid, datetime.datetime.now().timestamp())
 print(eco.add_streak(uuid, 2))
-"""
