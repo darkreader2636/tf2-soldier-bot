@@ -2,9 +2,10 @@ import random
 import sqlite3
 from functools import wraps
 from typing import Tuple, List
+import datetime
 
 
-Entry = Tuple[int, int, int]
+Entry = Tuple[int, int, str, int ,int] # id 0 , money 1 , pretty_name 2 , streak 3 , last_claim 4
 
 class Economy:
     """A wrapper for the economy database"""
@@ -18,7 +19,9 @@ class Economy:
         self.cur.execute("""CREATE TABLE IF NOT EXISTS economy (
             user_id INTEGER NOT NULL PRIMARY KEY,
             money INTEGER NOT NULL DEFAULT 0,
-            credits INTEGER NOT NULL DEFAULT 0
+            pretty_name TEXT NOT NULL DEFAULT doe,
+            streak INTEGER NOT NULL DEFAULT 0,
+            last_c INTEGER NOT NULL DEFAULT 0
         )""")
 
     def close(self):
@@ -50,8 +53,8 @@ class Economy:
     def new_entry(self, user_id: int) -> Entry:
         try:
             self.cur.execute(
-                "INSERT INTO economy(user_id, money, credits) VALUES(?,?,?)",
-                (user_id, 0, 0)
+                "INSERT INTO economy(user_id, money, pretty_name, streak ,last_c) VALUES(?,?,?,?,?)",
+                (user_id, 0, "none", 0, 0)
             )
             return self.get_entry(user_id)
         except sqlite3.IntegrityError:
@@ -73,10 +76,26 @@ class Economy:
         return self.get_entry(user_id)
 
     @_commit
-    def set_credits(self, user_id: int, credits: int) -> Entry:
+    def set_name(self, user_id: int, name: str) -> Entry:
         self.cur.execute(
-            "UPDATE economy SET credits=? WHERE user_id=?",
-            (credits, user_id)
+            "UPDATE economy SET pretty_name=? WHERE user_id=?",
+            (name, user_id)
+        )
+        return self.get_entry(user_id)
+
+    @_commit
+    def set_streak(self, user_id: int, streak: int) -> Entry:
+        self.cur.execute(
+            "UPDATE economy SET streak=? WHERE user_id=?",
+            (streak, user_id)
+        )
+        return self.get_entry(user_id)
+
+    @_commit
+    def set_claim(self, user_id: int, claim: int) -> Entry:
+        self.cur.execute(
+            "UPDATE economy SET last_c=? WHERE user_id=?",
+            (claim, user_id)
         )
         return self.get_entry(user_id)
 
@@ -102,12 +121,12 @@ class Economy:
         return self.get_entry(user_id)
 
     @_commit
-    def add_credits(self, user_id: int, credits_to_add: int) -> Entry:
-        credits = self.get_entry(user_id)[2]
-        total = credits + credits_to_add
+    def add_streak(self, user_id: int, streak_to_add: int) -> Entry:
+        streak = self.get_entry(user_id)[3]
+        total = streak + streak_to_add
         if total < 0:
             total = 0
-        self.set_credits(user_id, total)
+        self.set_streak(user_id, total)
         return self.get_entry(user_id)
 
     def random_entry(self) -> Entry:
