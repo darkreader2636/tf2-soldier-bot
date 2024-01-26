@@ -20,14 +20,25 @@ class Gambling(commands.Cog):
         user_data = self.eco.get_entry(ctx.author.id)
         claim = user_data[4]
         curtime = int(datetime.datetime.now().timestamp())
+        delta = curtime - claim
+        cooldown = 20
 
-        if curtime - claim < 60*60*20:
-            await ctx.send(f"Bu günün parasını zaten aldın! Sonrakine kalan süre: <t:{claim + 60*60*24}:R>")
+        if delta < cooldown:
+            await ctx.send(f"Bu günün parasını zaten aldın! Sonrakine kalan süre: <t:{claim + cooldown}:R>")
             return
 
-        self.eco.add_money(ctx.author.id, 500)
+        if delta > cooldown*2: #fark iki günden küçükse
+            self.eco.set_streak(ctx.author.id, 0)
+        else:
+            self.eco.add_streak(ctx.author.id, 1)
+            
+        streak = self.eco.get_entry(ctx.author.id)[3]
+
+        money_to_add = 500 + streak*10
+
+        self.eco.add_money(ctx.author.id, money_to_add)
         self.eco.set_claim(ctx.author.id, curtime)
-        await ctx.send("Günlüğün olan 500₺ 'yi aldın.")
+        await ctx.send(f"Günlüğün olan **{money_to_add}₺** 'yi aldın.\nSerin **{streak}** gün.")
 
     @commands.command(pass_context=True)
     async def cash(self, ctx):
