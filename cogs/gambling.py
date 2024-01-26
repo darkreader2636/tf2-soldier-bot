@@ -21,7 +21,7 @@ class Gambling(commands.Cog):
         claim = user_data[4]
         curtime = int(datetime.datetime.now().timestamp())
         delta = curtime - claim
-        cooldown = 20
+        cooldown = 60*60*20
 
         if delta < cooldown:
             await ctx.send(f"Bu günün parasını zaten aldın! Sonrakine kalan süre: <t:{claim + cooldown}:R>")
