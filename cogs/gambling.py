@@ -3,6 +3,7 @@ from cogs.economy import Economy
 import discord
 import random
 from asyncio import sleep
+import datetime
 
 class Gambling(commands.Cog):
     eco = Economy()
@@ -13,10 +14,19 @@ class Gambling(commands.Cog):
         self.eco.open()     
 
     @commands.command(pass_context=True)
-    @commands.cooldown(1, 60*60*24, commands.BucketType.user)
     async def daily(self, ctx):
         """Her gün günlük paranızı alın!"""
+
+        user_data = self.eco.get_entry(ctx.author.id)
+        claim = user_data[4]
+        curtime = int(datetime.datetime.now().timestamp())
+
+        if curtime - claim < 60*60*20:
+            await ctx.send(f"Bu günün parasını zaten aldın! Sonrakine kalan süre: <t:{claim + 60*60*24}:R>")
+            return
+
         self.eco.add_money(ctx.author.id, 500)
+        self.eco.set_claim(ctx.author.id, curtime)
         await ctx.send("Günlüğün olan 500₺ 'yi aldın.")
 
     @commands.command(pass_context=True)
@@ -28,10 +38,6 @@ class Gambling(commands.Cog):
     @commands.command(pass_context=True, aliases=['cf', 'coin'])
     async def coinflip(self, ctx, amount):
         """Biraz para kazanmak için yazı tura atın."""
-        if amount < 0:
-            await ctx.send("Miktar sıfırdan küçük olamaz!")
-            return
-        balance = self.eco.get_entry(ctx.author.id)[1]
         if amount == "all":
             if balance < 2500:
                 amount = balance
@@ -39,6 +45,11 @@ class Gambling(commands.Cog):
                 amount = 2500
         else:
             amount = int(amount)
+
+        if amount < 0:
+            await ctx.send("Miktar sıfırdan küçük olamaz!")
+            return
+        balance = self.eco.get_entry(ctx.author.id)[1]
     
         if amount > balance:
             await ctx.send("Yeterli paran yok!")
@@ -67,12 +78,11 @@ class Gambling(commands.Cog):
 
     @commands.command(pass_context=True, aliases=['s', 'slot'])
     @commands.cooldown(1, 30, commands.BucketType.user)
-    async def slots(self, ctx, amount: int):
+    async def slots(self, ctx, amount):
         """Paranla bahse girerek x10'e kadar kazan."""
-        if amount < 0:
-            await ctx.send("Miktar sıfırdan küçük olamaz!")
-            return
+
         balance = self.eco.get_entry(ctx.author.id)[1]
+
         if amount == "all":                                                                                                              
             if balance < 2500:                                                                                                            
                 amount = balance                                                                                                          
@@ -80,6 +90,11 @@ class Gambling(commands.Cog):
                 amount = 2500                                                                                                             
         else:                                                                                                                             
             amount = int(amount)
+
+        if amount < 0:
+            await ctx.send("Miktar sıfırdan küçük olamaz!")
+            return
+        
         if amount > balance:
             await ctx.send("Yeterli paran yok!")
             return
@@ -89,7 +104,7 @@ class Gambling(commands.Cog):
 
         await ctx.send("**`___SLOTS___`**")
 
-        slots = [':spider_web:' for _ in range(3)]
+        slots = [':black_large_square:' for _ in range(3)]
         slot_spin = self.slot_spin(slots)
 
         slot_message = await ctx.send(slot_spin)

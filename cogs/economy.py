@@ -136,10 +136,3 @@ class Economy:
     def top_entries(self, n: int=0) -> List[Entry]:
         self.cur.execute("SELECT * FROM economy ORDER BY money DESC")
         return (self.cur.fetchmany(n) if n else self.cur.fetchall())
-
-eco = Economy()
-uuid = random.randrange(1, 100)
-eco.add_money(uuid, 100)
-eco.set_name(uuid, "John")
-eco.set_claim(uuid, datetime.datetime.now().timestamp())
-print(eco.add_streak(uuid, 2))
