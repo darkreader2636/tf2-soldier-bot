@@ -23,6 +23,8 @@ class Gambling(commands.Cog):
         delta = curtime - claim
         cooldown = 60*60*20
 
+        self.check_name(ctx.author.display_name, ctx.author.id)
+
         if delta < cooldown:
             await ctx.send(f"Bu günün parasını zaten aldın! Sonrakine kalan süre: <t:{claim + cooldown}:R>")
             return
@@ -43,12 +45,14 @@ class Gambling(commands.Cog):
     @commands.command(pass_context=True)
     async def cash(self, ctx):
         """Elinizdeki para miktarını gösterir"""
+        self.check_name(ctx.author.display_name, ctx.author.id)
         usr_money = self.eco.get_entry(ctx.author.id)[1]
         await ctx.send(f"Şu anda {usr_money}₺ paran var.")
 
     @commands.command(pass_context=True, aliases=['cf', 'coin'])
     async def coinflip(self, ctx, amount):
         """Biraz para kazanmak için yazı tura atın."""
+        self.check_name(ctx.author.display_name, ctx.author.id)
         if amount == "all":
             if balance < 2500:
                 amount = balance
@@ -79,6 +83,8 @@ class Gambling(commands.Cog):
     
     @commands.command(pass_context=True)
     async def send(self, ctx, hedef: discord.User, amount: int):
+        """Birbirinize para gönderin!"""
+        self.check_name(ctx.author.display_name, ctx.author.id)
         balance = self.eco.get_entry(ctx.author.id)[1]
         if amount > balance:
             await ctx.send("Yeterli paran yok!")
@@ -91,7 +97,7 @@ class Gambling(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def slots(self, ctx, amount):
         """Paranla bahse girerek x10'e kadar kazan."""
-
+        self.check_name(ctx.author.display_name, ctx.author.id)
         balance = self.eco.get_entry(ctx.author.id)[1]
 
         if amount == "all":                                                                                                              
@@ -147,7 +153,27 @@ class Gambling(commands.Cog):
 
         await ctx.send(out_text)
 
+    @commands.command(pass_context=True, aliases=['t'])
+    async def top(self, ctx,):
+        """En zengin 10 Kişiyi görün"""
+        message_to_send = "En Zengin 10 kişi:\n"
+        for user in enumerate(self.eco.top_entries(10)):
+            id = user[0]+1
+            user= user[1]
+            name = user[2]
+            money = user[1]
+            str_to_append = f"{id}) {name} {money}₺\n"
+            message_to_send = message_to_send+str_to_append
+        message_to_send = message_to_send + "`(Eğer isminiz düzgün değilse .tf2 cash ile düzeltebilirsiniz)`"
+        await ctx.send(message_to_send)
+
     def slot_spin(self, slots):
         return f'` `{slots[0]}{slots[1]}{slots[2]}` ` .'
-
+    
+    def check_name(self, name: str, user_id: int):
+        user_name = self.eco.get_entry(user_id)[2]
+        if(user_name == name):
+            return
+        self.eco.set_name(user_id, name)
+        return
         
