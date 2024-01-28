@@ -71,7 +71,7 @@ async def on_ready():
 #    print('--------------------------------------------')
 #    print(datetime.datetime.now())
 	log.Startup(bot.user, bot.user.id)
-#	kalan_gun.start()
+	kalan_gun.start()
 
 	await bot.add_cog(Gambling(bot))
 	
@@ -151,7 +151,7 @@ async def kufur_kontrol(message, user):
 
 @tasks.loop(minutes=1)
 async def kalan_gun():
-	if (datetime.datetime.now().hour == 13 and datetime.datetime.now().minute == 22):
+	if (datetime.datetime.now().hour == 17 and datetime.datetime.now().minute == 30):
 		today = datetime.date.today()
 		future = datetime.date(2024, 2, 6)
 		diff = future - today
