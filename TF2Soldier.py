@@ -151,14 +151,13 @@ async def kufur_kontrol(message, user):
 
 @tasks.loop(minutes=1)
 async def kalan_gun():
-	return
-	if (datetime.datetime.now().hour == 17 and datetime.datetime.now().minute == 30):
+	if (datetime.datetime.now().hour == 13 and datetime.datetime.now().minute == 22):
 		today = datetime.date.today()
-		future = datetime.date(2024, 1, 19)
+		future = datetime.date(2024, 2, 6)
 		diff = future - today
 		channel = bot.get_channel(int(os.getenv('DAILY_CHANNEL')))
 		log.INFO("Sent daily message")
-		await channel.send('{0} gün kaldı.'.format(str(diff)[:2]))
+		await channel.send('Tatilin Bitmesine{0} gün kaldı.'.format(str(diff)[:2]))
 
 
 @bot.hybrid_command()
