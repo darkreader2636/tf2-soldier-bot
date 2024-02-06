@@ -86,12 +86,12 @@ async def on_message(message: discord.Message):
 
 	if message.content == ".tf2 dev off":
 		dev_mode = 0
-		channel_send = ["0", "1"]
+		channel_send.clear()
 		return
 
 	if message.content == ".tf2 dev on":
 		dev_mode = 1
-		channel_send = ["0", "1"]
+		channel_send.clear()
 		return
 	
 	if dev_mode == 1 and message.content[:4] == ".tf2":
@@ -153,11 +153,11 @@ async def kufur_kontrol(message, user):
 async def kalan_gun():
 	if (datetime.datetime.now().hour == 17 and datetime.datetime.now().minute == 30):
 		today = datetime.date.today()
-		future = datetime.date(2024, 2, 6)
+		future = datetime.date(2024, 4, 5)
 		diff = future - today
 		channel = bot.get_channel(int(os.getenv('DAILY_CHANNEL')))
 		log.INFO("Sent daily message")
-		await channel.send('Tatilin Bitmesine{0} gün kaldı.'.format(str(diff)[:2]))
+		await channel.send('Ara tatile {0} gün kaldı.'.format(str(diff)[:2]))
 
 
 @bot.hybrid_command()
